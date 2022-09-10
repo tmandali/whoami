@@ -1,0 +1,31 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: whoami
+  namespace: dev
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - kind: Rule
+    match: Host(`whoami.tmrcld`)
+    services:
+    - name: whoami
+      port: 80
+    middlewares:
+    - name: security
+  tls:
+    secretName: whoami-tls-secret
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: whoami-cert
+  namespace: dev
+spec:
+  secretName: whoami-tls-secret
+  issuerRef:
+    name: ca-dev-clusterissuer
+    kind: ClusterIssuer
+  dnsNames:
+    - whoami.tmrcld
